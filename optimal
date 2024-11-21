@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+void optimalPageReplacement(int pages[], int n, int capacity) {
+    unordered_set<int> s;          // To store pages currently in memory
+    unordered_map<int, int> nextUse; // To store the next use of each page
+    int pageFaults = 0;
+
+    for (int i = 0; i < n; i++) {
+        // If the page is not in memory
+        if (s.find(pages[i]) == s.end()) {
+            // If memory is full, replace a page
+            if (s.size() == capacity) {
+                int farthest = -1, pageToReplace;
+                for (auto page : s) {
+                    // Find the page that is not used for the longest time
+                    auto it = find(pages + i + 1, pages + n, page);
+                    if (it == pages + n) { // Page not used again
+                        pageToReplace = page;
+                        break;
+                    } else {
+                        int index = it - pages;
+                        if (index > farthest) {
+                            farthest = index;
+                            pageToReplace = page;
+                        }
+                    }
+                }
+                s.erase(pageToReplace); // Remove the chosen page
+            }
+            s.insert(pages[i]); // Add the new page
+            pageFaults++;
+        }
+
+        // Print the current memory state
+        cout << "Step " << i + 1 << ": ";
+        for (auto page : s) {
+            cout << page << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Total Page Faults: " << pageFaults << endl;
+}
+
+int main() {
+    int n, capacity;
+
+    cout << "Enter the number of pages: ";
+    cin >> n;
+
+    int pages[n];
+    cout << "Enter the sequence of page references:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> pages[i];
+    }
+
+    cout << "Enter the memory capacity: ";
+    cin >> capacity;
+
+    optimalPageReplacement(pages, n, capacity);
+
+    return 0;
+}
