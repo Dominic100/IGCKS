@@ -1,0 +1,60 @@
+#include <iostream>
+#include <list>
+#include <unordered_map>
+
+using namespace std;
+
+void lruPageReplacement(int pages[], int n, int capacity) {
+    list<int> lruList;             // To store pages based on usage
+    unordered_map<int, list<int>::iterator> pageMap; // Map to list iterators
+    int pageFaults = 0;
+
+    for (int i = 0; i < n; i++) {
+        // If the page is not in memory
+        if (pageMap.find(pages[i]) == pageMap.end()) {
+            // If memory is full, remove the least recently used page
+            if (lruList.size() == capacity) {
+                int lruPage = lruList.back(); // Last element in list
+                lruList.pop_back();          // Remove it
+                pageMap.erase(lruPage);      // Remove from map
+            }
+            pageFaults++;
+        } else {
+            // Page is in memory, remove it from the list (will re-add at front)
+            lruList.erase(pageMap[pages[i]]);
+        }
+
+        // Add the current page at the front of the list
+        lruList.push_front(pages[i]);
+        pageMap[pages[i]] = lruList.begin(); // Update map with new position
+
+        // Print the current memory state
+        cout << "Step " << i + 1 << ": ";
+        for (auto page : lruList) {
+            cout << page << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Total Page Faults: " << pageFaults << endl;
+}
+
+int main() {
+    int n, capacity;
+
+    cout << "Enter the number of pages: ";
+    cin >> n;
+
+    int pages[n];
+    cout << "Enter the sequence of page references:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> pages[i];
+    }
+
+    cout << "Enter the memory capacity: ";
+    cin >> capacity;
+
+    lruPageReplacement(pages, n, capacity);
+
+    return 0;
+}
